@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<title>Hangman</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<script src="hangman.js"></script>
+<style type="text/css">
+body {
+	background: #c1d72e;
+	font-family: "HelveticaNeue-Light", "Helvetica Neue Light", "Helvetica Neue", Helvetica, Arial, "Lucida Grande", sans-serif; 
+	height:100%;
+}
+#alphabet {
+	padding: 0;
+	max-width: 100%;
+}
+#alphabet:after {
+	content: "";
+	display: table;
+	clear: both;
+}
+#alphabet li {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+	float: left;
+	margin: 0 10px 10px 0;
+	list-style: none;
+	width: 35px;
+	height: 35px;
+	padding-top: 10px;
+	padding-bottom: 10px;
+	background: #fff;
+	color: #c1d72e;
+	cursor: pointer;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+	-khtml-border-radius: 5px;
+	border: solid 1px #fff;
+	text-align: center;
+}
+#alphabet li.inactive {
+	background-color:rgba(0, 0, 0, 0.65);
+	color:rgba(193, 215, 46, 0.25);
+	pointer-events: none;
+}
+#alphabet li.no-touch:hover {
+	background: #c1d72e;
+	border: solid 1px #fff;
+	color: #fff;
+}
+#blanked {
+	background: white;
+	word-spacing: 4px;
+}
+</style>
+</head><body>
+<div class="alert alert-danger" role="alert" id="disconnected_panel">
+	<strong>Error!</strong> Disconnected from server.
+</div>
+<div class="container">
+	<div id="promptModal" class="modal fade hidden" role="dialog">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title">Choose Word</h4>
+				</div>
+				<div class="modal-body">
+					<form role="form" id="promptForm" onsubmit="return false;">
+						<div class="form-group">
+							<label class="control-label" for="promptword" placeholder="Chosen Word">Word</label>
+							<input type="text" class="form-control" id="promptword">
+							<span class="glyphicon glyphicon-remove form-control-feedback hidden" id="prompterricon"></span>
+							<span id="promptHelp" class="help-block"></span>
+						</div>
+						<button type="submit" class="btn btn-default" id="promptwordbtn">Submit</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div id="promptGeneral" class="modal fade" style="display: none;" role="dialog">
+		<div class="modal-dialog">
+			<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title" id="promptGenTitle">Placeholder Title</h4>
+				</div>
+				<div class="modal-body">
+					<form role="form" id="promptGenForm" onsubmit="return false;">
+						<div class="form-group">
+							<label class="control-label" for="promptGenWord" placeholder="Chosen Word" id="promptGenWordLbl">Placeholder</label>
+							<input type="text" class="form-control" id="promptGenWord">
+							<span class="glyphicon glyphicon-remove form-control-feedback hidden" id="promptGenErrIcon"></span>
+							<div class="form-group" id="promptGeneralWordFill" style="display: none;">
+								<div class="input-group">
+									<input class="form-control" type="text" maxlength="1" placeholder="a">
+									<span class="input-group-addon">mb</span>
+									<input class="form-control" type="text" maxlength="2" placeholder="er">
+									<span class="input-group-addon">is</span>
+									<input class="form-control" type="text" maxlength="1" placeholder="h">
+								</div>
+							</div>
+							<span id="promptGenHelp" class="help-block has-error"></span>
+							<div id="promptGeneralChoice" style="display: none;">
+								<input type="button" class="btn btn-success prompt-btn-choice" value="Yes">
+								<input type="button" class="btn btn-danger prompt-btn-choice" value="No">
+							</div>
+						</div>
+						<button type="submit" class="btn btn-default" id="promptGenBtn">Submit</button>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="jumbotron">
+		<h1>Hangman</h1>
+		<p>From here, you can guess letters and keep apprised of your progress.</p>
+	</div><br />
+	<div class="table-responsive">
+		<caption><h2>History</h2></caption>
+		<table class="table table-hover">
+			<thead>
+				<tr>
+					<th>Level</th>
+					<th>Word</th>
+					<th>Result</th>
+					<th>Score</th>
+				</tr>
+			</thead>
+			<tbody class="history-table-body">
+			</tbody>
+		</table>
+	</div>
+	<div>
+		<h2 class="blanked-word-header">Word</h2>
+		<strong><p class="lead" id="blanked"></p></strong>
+	</div><br />
+	<div>
+		<h2>Incorrect Guesses</h2>
+		<div class="progress" id="guess_progress">
+			<div class="progress-bar" role="progressbar" style="width:0%">0%</div>
+		</div>
+	</div><br />
+	<div>
+		<h2>Guess a letter</h2>
+		<div id="alphabet"></div>
+		<form role="form">
+			<div class="form-group">
+				<label for="letter">Or select letter from below:</label>
+				<select class="form-control" id="letter"></select>
+			</div>
+			<button type="button" class="btn btn-primary" id="guessbtn">Guess!</button>
+		</form>
+	</div><br /><br />
+</div>
+</body></html>
