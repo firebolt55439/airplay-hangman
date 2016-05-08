@@ -1,6 +1,6 @@
 # airplay-hangman
 
-A hangman game written in C++ that is actually quite advanced:
+A hangman game written in C++ that has a lot to offer:
 
 - Can be broadcasted to any Airplay-compatible device in the LAN (or even via Bluetooth)
 - Advertises itself as a Bonjour service and searches for Airplay devices via Bonjour
