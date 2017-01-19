@@ -21,4 +21,5 @@ C++ library written specifically for Airplay photo and video streaming.
 
 In `src/Words.h`, the last include directive must be modified to reflect the path to 
 libairplay on your local filesystem. To locate libairplay, simply navigate to my profile
-and it will appear in a list of my repositories (Ctrl/Command-F is your best friend!).
+and it will appear in a list of my repositories (Ctrl/Command-F is your best friend!), or
+find it [here](https://github.com/firebolt55439/libairplay).
