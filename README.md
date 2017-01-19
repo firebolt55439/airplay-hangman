@@ -14,9 +14,11 @@ Check it out! Can be executed by simply running the compiled executable (provide
 in the obj/ directory) on any Mac, or recompiling using Cygwin or a similar
 layer for Windows, and should compile on Linux without any problems.
 
-## Important
+## Important Setup Note
 
-Note that this project uses another repository, namely airplay-lib, a lightweight C++
-library written specifically for Airplay photo and video streaming. In `src/Words.h`,
-the last include directive must be modified to reflect the path to airplay-lib on
-your local filesystem.
+Note that this project uses another repository of mine, namely libairplay, a lightweight
+C++ library written specifically for Airplay photo and video streaming. 
+
+In `src/Words.h`, the last include directive must be modified to reflect the path to 
+libairplay on your local filesystem. To locate libairplay, simply navigate to my profile
+and it will appear in a list of my repositories (Ctrl/Command-F is your best friend!).
