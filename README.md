@@ -13,3 +13,6 @@ size or bounds, from a 200x300 up to a 4K display.
 Check it out! Can be executed by simply running the compiled executable (provided
 in the obj/ directory) on any Mac, or recompiling using Cygwin or a similar
 layer for Windows, and should compile on Linux without any problems.
+
+Note that this project uses another repository, namely airplay-lib, a lightweight C++
+library written specifically for Airplay photo and video streaming.
