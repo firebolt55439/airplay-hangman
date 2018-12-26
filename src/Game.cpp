@@ -2,7 +2,7 @@
 #include <cassert>
 #include <chrono>
 
-Game::Game(AirplayConnection& c) : conn(c){
+Game::Game(airplay_device& c) : conn(c){
 	// Initialize wordlist.
 	list = Wordlist();
 	if(!list.readWordlist(WORDLIST_PATH)){
@@ -10,7 +10,7 @@ Game::Game(AirplayConnection& c) : conn(c){
 		std::exit(1);
 	}
 	list.scoreWords();
-	
+
 	// Initialize background image.
 	FILE* in = fopen("background.png", "rb");
 	background = gdImageCreateFromPng(in);
@@ -75,11 +75,11 @@ std::string Game::getCurrentGameImage(bool result_screen){
 	char* err;
 	const int width = 1920, height = 1080; // 1920 x 1080
 	char* font_times = const_cast<char*>("fonts/times.ttf");
-	
+
 	// Initialize the image from the background image.
 	gdImagePtr im = gdImageCreateTrueColor(background->sx, background->sy);
 	gdImageCopy(im, background, 0, 0, 0, 0, im->sx, im->sy);
-	
+
 	// Initialize selected colors.
 	int red = getColor(im, 255, 0, 0);
 	int green = getColor(im, 0, 255, 0);
@@ -88,7 +88,7 @@ std::string Game::getCurrentGameImage(bool result_screen){
 	int keyboard_color = getColor(im, 175, 180, 210);
 	int rank_color = getColor(im, 65, 145, 75);
 	int cross_color = getColor(im, 100, 90, 80);
-	
+
 	// Write the score at the bottom-left corner of the screen. //
 	if(mode == MODE_COMPUTER_PICKS_WORD){
 		std::stringstream score_text;
@@ -101,7 +101,7 @@ std::string Game::getCurrentGameImage(bool result_screen){
 			return "";
 		}
 	}
-	
+
 	// Write the level of the game and the total number of levels. //
 	if(mode == MODE_COMPUTER_PICKS_WORD){
 		std::stringstream level_text;
@@ -114,7 +114,7 @@ std::string Game::getCurrentGameImage(bool result_screen){
 			return "";
 		}
 	}
-	
+
 	if(result_screen && !waitingForWord){
 		// Write the word across the screen, optimizing the size. //
 		// Get the bounding rectangle and optimize the size and position based on that.
@@ -145,11 +145,11 @@ std::string Game::getCurrentGameImage(bool result_screen){
 				yPos += (MAX_Y_REACH - 100) - brect[3];
 			}
 		}
-		
+
 		// Write the word with the optimized size and/or position.
 		gdImageStringFT(im, &brect[0], (lastGameResult == 1 ? green : red), font_times, size, 0.0, xPos, yPos, const_cast<char*>(word_text.substr(0, 14).c_str()));
 		gdImageStringFT(im, &brect[0], blue_144_color, font_times, size, 0.0, brect[2], yPos, const_cast<char*>(word_text.substr(14).c_str()));
-		
+
 		// Show if the user levelled up or down, if applicable. //
 		if(levelDiff != 0){
 			// Generate the level up/down text.
@@ -167,7 +167,7 @@ std::string Game::getCurrentGameImage(bool result_screen){
 				text << "You moved down " << abs(levelDiff) << " " << level_text << ".";
 			}
 			level_text = text.str();
-			
+
 			// Optimize the size of it.
 			xPos = 75;
 			yPos = BASE_WORD_HEIGHT + 220;
@@ -181,11 +181,11 @@ std::string Game::getCurrentGameImage(bool result_screen){
 				}
 				if(brect[2] > width) size -= GRANULARITY;
 			}
-			
+
 			// Write it with the optimized size.
 			gdImageStringFT(im, &brect[0], color, font_times, size, 0.0, xPos, yPos, const_cast<char*>(level_text.c_str()));
 		}
-		
+
 		// Write the definition of the word. //
 		// TODO
 	} else if(!result_screen && !waitingForWord){
@@ -198,24 +198,24 @@ std::string Game::getCurrentGameImage(bool result_screen){
 			return "";
 		}
 		const int MIN_Y_REACH = brect[3] + 10;
-	
+
 		// And write the guessing stage as an image (a.k.a. the actual hangman).
 		std::stringstream stage_file;
 		stage_file << "data/stage" << (getIncorrectGuessesNum() + 1) << ".png";
 		FILE* in = fopen(stage_file.str().c_str(), "rb");
-		if(!in){ 
+		if(!in){
 			std::cerr << "Could not open '" << stage_file.str() << "' for reading hangman stage." << std::endl;
 			return "";
 		}
 		gdImagePtr stage_img = gdImageCreateFromPng(in);
 		fclose(in);
 		gdImageCopy(im, stage_img, 1375, 100, 0, 0, stage_img->sx, stage_img->sy);
-	
+
 		// Write the word down as blanks (underscores), substituting the actual letter where
 		// guessed correctly, and optimize the size using the bounding rectangle.
 		// Generate the "blanked" word.
 		std::string blankedWord = getBlankedWord();
-	
+
 		// Get the bounding rectangle and optimize the size and position based on that.
 		size = 40.0;
 		const int DIFF_MAX = 20;
@@ -246,10 +246,10 @@ std::string Game::getCurrentGameImage(bool result_screen){
 				yPos = std::max(yPos, MIN_Y_REACH);
 			}
 		}
-	
+
 		// Write the blanked word with the optimized size and/or position.
 		gdImageStringFT(im, &brect[0], blue_144_color, font_times, size, 0.0, xPos, yPos, const_cast<char*>(blankedWord.c_str()));
-	
+
 		// Draw a "keyboard" and mark all letters that have already been guessed, and whether
 		// it was a correct/incorrect guess.
 		xPos = 45;
@@ -270,7 +270,7 @@ std::string Game::getCurrentGameImage(bool result_screen){
 					color = red;
 				}
 			}
-		
+
 			// Write the letter.
 			std::string letter;
 			letter.push_back(ch);
@@ -280,7 +280,7 @@ std::string Game::getCurrentGameImage(bool result_screen){
 				std::cerr << err << std::endl;
 				return "";
 			}
-		
+
 			// Cross the letter out, if applicable.
 			if(should_cross){
 				gdImageSetThickness(im, 4);
@@ -297,7 +297,7 @@ std::string Game::getCurrentGameImage(bool result_screen){
 				gdImageLine(im, brect[0], brect[1], brect[4], brect[5], cross_color);
 				gdImageLine(im, brect[2], brect[3], brect[6], brect[7], cross_color);
 			}
-		
+
 			// Compute the next position.
 			xPos += 200;
 			if(xPos >= 1900){
@@ -306,7 +306,7 @@ std::string Game::getCurrentGameImage(bool result_screen){
 			}
 			++ch;
 		}
-	
+
 		// Write the word rank, optimizing for space (right-aligning) using the bounding rectangle. //
 		if(mode == MODE_COMPUTER_PICKS_WORD){
 			// Generate word rank text.
@@ -314,7 +314,7 @@ std::string Game::getCurrentGameImage(bool result_screen){
 			auto& words = list.getSortedWords();
 			difficulty_text << "Word Rank: #" << std::distance(words.begin(), std::find(words.begin(), words.end(), word));
 			difficulty_text << "/" << words.size();
-	
+
 			// Optimize text position using the bounding rectangle.
 			xPos = 1250;
 			yPos = 1050;
@@ -323,7 +323,7 @@ std::string Game::getCurrentGameImage(bool result_screen){
 				std::cerr << err << std::endl;
 				return "";
 			}
-	
+
 			// Write the word rank text in the optimized position.
 			diff = (width - 20) - brect[2];
 			xPos += diff;
@@ -339,7 +339,7 @@ std::string Game::getCurrentGameImage(bool result_screen){
 			return "";
 		}
 	}
-	
+
 	// Get JPEG text.
 	int jpegSize;
 	char* jpeg_data = (char*)gdImageJpegPtr(im, &jpegSize, 100);
@@ -348,18 +348,18 @@ std::string Game::getCurrentGameImage(bool result_screen){
 		ret.push_back(jpeg_data[i]);
 	}
 	gdFree(jpeg_data);
-	
+
 	// Clean up.
 	gdImageDestroy(im);
 	return ret;
 }
 
 void Game::showPicture(std::string& data){
-	AirplayImage* img = new AirplayImage();
-	img->size = data.length();
-	img->data = (void*)data.c_str();
-	conn.sendMessage(MESSAGE_SHOW_PICTURE, (void*)img);
-	delete img;
+	// AirplayImage* img = new AirplayImage();
+	// img->size = data.length();
+	// img->data = (void*)data.c_str();
+	conn.send_message(MessageType::ShowPicture, data);
+	// delete img;
 }
 
 int Game::computeScoreChange(bool won, unsigned int level){
@@ -546,7 +546,7 @@ char Game::nextLetterToGuess(){
 		if(!works) continue;
 		wordSubset.push_back(word);
 	}
-	
+
 	// Count the occurences of each letter in each blank using the subset of possible words. //
 	std::map<unsigned int, std::map<char, unsigned long long> > blank_counts;
 	for(std::string& word : wordSubset){
@@ -562,7 +562,7 @@ char Game::nextLetterToGuess(){
 			}
 		}
 	}
-	
+
 	// Compute the probability, by blank, of each letter appearing in the blank. //
 	std::map<unsigned int, std::map<char, double> > probabilities;
 	for(auto& pair : blank_counts){
@@ -577,7 +577,7 @@ char Game::nextLetterToGuess(){
 			std::cerr << "\t" << std::get<0>(on) << ": " << prob << "%" << std::endl;
 		}
 	}
-	
+
 	// Find the letter that has the highest probability for any blank and guess it.
 	char guessingLetter;
 	double maxProb;
@@ -605,11 +605,11 @@ void Game::start_game(unsigned int theLevel, GameMode theMode){
 	* 2. User thinks of a word at a specified level, and computer guesses.
 	* 3. User thinks of a word while other users try to guess it, and computer is an arbiter and a screen.
 	*/
-	
+
 	// Instantiate necessary variables.
 	this->level = theLevel;
 	this->mode = theMode;
-	
+
 	while(true){ // everything is in a loop so the mode and level can be changed on-demand
 		// Handle current mode. //
 		while(mode == MODE_COMPUTER_PICKS_WORD){
@@ -621,18 +621,18 @@ void Game::start_game(unsigned int theLevel, GameMode theMode){
 			guessed.clear(); // clear guessed letters
 			lastGameResult = -1; // set game to ongoing state
 			gameMutex.unlock();
-		
+
 			// Mark the time. //
 			auto now = std::chrono::system_clock::now();
 			auto duration = now.time_since_epoch();
 			auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-	
+
 			// Pick a word at the specified level.
 			gameMutex.lock();
 			word = list.getWordAtLevel(level);
 			printf("Chosen word: %s (%lu letters) at level %u.\n", word.c_str(), word.length(), level);
 			gameMutex.unlock();
-		
+
 			// Loop, updating the game image each time.
 			while(getIncorrectGuessesNum() < GUESS_LIMIT && getBlankedWord().find('_') != std::string::npos){
 				// Generate the current game image and display it.
@@ -641,11 +641,11 @@ void Game::start_game(unsigned int theLevel, GameMode theMode){
 				ofp.write(img.c_str(), img.length());
 				ofp.close();
 				showPicture(img);
-		
+
 				// Sleep so as not to create a busy loop. //
 				sleep(1);
 			}
-			
+
 			// TODO: Bonus based on time.
 			// Mark win/loss.
 			if(getIncorrectGuessesNum() >= GUESS_LIMIT){
@@ -658,11 +658,11 @@ void Game::start_game(unsigned int theLevel, GameMode theMode){
 				alert = "You win! The word was '" + word + "'.";
 				lastGameResult = 1;
 			}
-		
+
 			// Compute and apply score difference.
 			int score_diff = computeScoreChange((bool)lastGameResult, level);
 			score += score_diff;
-		
+
 			// Compute and apply level difference.
 			levelDiff = 0;
 			if(lastGameResult == 0){
@@ -673,7 +673,7 @@ void Game::start_game(unsigned int theLevel, GameMode theMode){
 				if(level < NUM_LEVELS) levelDiff = 1;
 			}
 			level = (unsigned int)((int)level + levelDiff);
-		
+
 			// Broadcast win/loss.
 			if(lastGameResult == 0){
 				alert = "You lost! ";
@@ -683,11 +683,11 @@ void Game::start_game(unsigned int theLevel, GameMode theMode){
 				if(levelDiff > 0) alert += "Level up! ";
 			}
 			alert += "The word was '" + word + "'.";
-		
+
 			// Show result screen.
 			std::string img = getCurrentGameImage(/*result_screen=*/true);
 			showPicture(img);
-		
+
 			// Delay before starting next round.
 			std::cerr << "Delaying...\n";
 			flashDelay = true;
@@ -706,21 +706,21 @@ void Game::start_game(unsigned int theLevel, GameMode theMode){
 			guessed.clear(); // clear guessed letters
 			lastGameResult = -1; // set game to ongoing state
 			gameMutex.unlock();
-			
+
 			// Mark the time. //
 			auto now = std::chrono::system_clock::now();
 			auto duration = now.time_since_epoch();
 			auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-	
+
 			// Prompt the user for a word.
 			// TODO: Have alerts/server broadcasts have a "timestamp" field, and provide a macro language
 			// to embed constructs such as timers counting down to a specified unix time (e.g. for flash delay
 			// between rounds).
-			
+
 			gameMutex.lock();
 			waitingForWord = true;
 			gameMutex.unlock();
-		
+
 			// Loop, updating the game image each time.
 			while(waitingForWord || (getIncorrectGuessesNum() < GUESS_LIMIT && getBlankedWord().find('_') != std::string::npos)){
 				// Generate the current game image and display it.
@@ -729,11 +729,11 @@ void Game::start_game(unsigned int theLevel, GameMode theMode){
 				ofp.write(img.c_str(), img.length());
 				ofp.close();
 				showPicture(img);
-		
+
 				// Sleep so as not to create a busy loop. //
 				sleep(1);
 			}
-		
+
 			// TODO: Flash result on screen for specified amount of time + broadcast to connected devices.
 			// TODO: Bonus based on time.
 			// Mark win/loss.
@@ -747,7 +747,7 @@ void Game::start_game(unsigned int theLevel, GameMode theMode){
 				alert = "You win! The word was '" + word + "'.";
 				lastGameResult = 1;
 			}
-		
+
 			// Broadcast win/loss.
 			if(lastGameResult == 0){
 				alert = "You lost! ";
@@ -755,11 +755,11 @@ void Game::start_game(unsigned int theLevel, GameMode theMode){
 				alert = "You win! ";
 			}
 			alert += "The word was '" + word + "'.";
-		
+
 			// Show result screen.
 			std::string img = getCurrentGameImage(/*result_screen=*/true);
 			showPicture(img);
-		
+
 			// Delay before starting next round.
 			std::cerr << "Delaying...\n";
 			flashDelay = true;
@@ -780,12 +780,12 @@ void Game::start_game(unsigned int theLevel, GameMode theMode){
 			lastGameResult = -1; // set game to ongoing state
 			guessValidity.clear(); // clear guesses
 			gameMutex.unlock();
-			
+
 			// Mark the time. //
 			auto now = std::chrono::system_clock::now();
 			auto duration = now.time_since_epoch();
 			auto elapsed_ms = std::chrono::duration_cast<std::chrono::milliseconds>(duration).count();
-	
+
 			// Prompt the user for the number of letters.
 			gameMutex.lock();
 			std::cerr << "Random word: " << list.getWordAtLevel(rand() % NUM_LEVELS + 1) << std::endl;
@@ -797,7 +797,7 @@ void Game::start_game(unsigned int theLevel, GameMode theMode){
 			alert = "";
 			word = std::string(wordLength, '_');
 			gameMutex.unlock();
-		
+
 			// Loop, updating the game image each time.
 			/*
 			* Guessing Algorithm:
@@ -821,10 +821,10 @@ void Game::start_game(unsigned int theLevel, GameMode theMode){
 				ofp.close();
 				showPicture(img);
 				*/
-				
+
 				// Decide which letter to guess. //
 				char guessingLetter = nextLetterToGuess();
-				
+
 				// Send the letter to the user to affirm/deny. //
 				gameMutex.lock();
 				lastComputerGuess = guessingLetter;
@@ -833,11 +833,11 @@ void Game::start_game(unsigned int theLevel, GameMode theMode){
 				fmt << (char)toupper(lastComputerGuess) << " In Your Word?, choice)";
 				alert = fmt.str();
 				gameMutex.unlock();
-				
+
 				// Wait for the user's response. //
 				while(lastComputerGuess != '\0') usleep(500);
 			}
-			
+
 			// Ask the user what the word actually was if we didn't guess it. //
 			if(getBlankedWord().find('_') != std::string::npos){
 				gameMutex.lock();
@@ -845,7 +845,7 @@ void Game::start_game(unsigned int theLevel, GameMode theMode){
 				gameMutex.unlock();
 				while(true) usleep(500);
 			}
-			
+
 			// TODO: Bonus based on time.
 			// Mark win/loss.
 			if(getIncorrectGuessesNum() >= GUESS_LIMIT){
@@ -857,18 +857,18 @@ void Game::start_game(unsigned int theLevel, GameMode theMode){
 				std::cout << "Computer wins!" << std::endl;
 				lastGameResult = 1;
 			}
-		
+
 			// Broadcast win/loss.
 			if(lastGameResult == 0){
 				alert = "Computer lost!";
 			} else {
 				alert = "Computer won! The word was '" + word + "'.";
 			}
-			
+
 			// Show result screen.
 			std::string img = getCurrentGameImage(/*result_screen=*/true);
 			showPicture(img);
-		
+
 			// Delay before starting next round.
 			std::cerr << "Delaying...\n";
 			flashDelay = true;

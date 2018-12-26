@@ -3,18 +3,17 @@
 #include "Server.h"
 
 #define SERVER_HOST "127.0.0.1"
-#define SERVER_PORT 8080
+#define SERVER_PORT 8001
 
 int main(int argc, char** argv){
 	// Search for Airplay-compatible devices and select the first one.
-	AirplayBrowser browser;
-	unsigned int num_discovered = browser.browseForDevices();
+	const auto devices = airplay_browser::get_devices();
+	unsigned int num_discovered = devices.size();
 	printf("Discovered %u device(s).\n", num_discovered);
-	AirplayDevice& device = browser.getDiscovered()[0];
-	AirplayConnection conn(device);
-	conn.openConnection();
+	airplay_device conn(devices.begin()->second);
 	printf("Sending message...\n");
-	conn.sendMessage(MESSAGE_GET_SERVICES, NULL, /*debug=*/true);
+	// conn.sendMessage(MESSAGE_GET_SERVICES, NULL, /*debug=*/true);
+	std::cout << conn.send_message(MessageType::GetServices) << std::endl;
 	printf("Sent!\n");
 	
 	// Initialize thread pool.
@@ -22,7 +21,7 @@ int main(int argc, char** argv){
 	
 	// Start the game with the selected mode.
 	Game game(conn);
-	threads.push_back(std::thread(&Game::start_game, &game, /*level=*/1, /*mode=*/MODE_COMPUTER_GUESSES_WORD));
+	threads.push_back(std::thread(&Game::start_game, &game, /*level=*/1, /*mode=*/MODE_COMPUTER_PICKS_WORD));
 	
 	// Start the web server.
 	Server server(SERVER_HOST, SERVER_PORT, game);

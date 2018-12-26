@@ -72,10 +72,10 @@ bool Wordlist::readWordlist(std::string filename){
 			if(!tmp.length()) continue;
 			if(tmp.find('\'') != std::string::npos) continue;
 			if(tmp.length() < MIN_LETTERS) continue;
-			
+
 			// Transform to lowercase.
 			std::transform(tmp.begin(), tmp.end(), tmp.begin(), ::tolower);
-			
+
 			// Finally, save the word.
 			words.push_back(tmp);
 		}
@@ -105,7 +105,7 @@ void Wordlist::scoreWords(void){
 	unsigned int length, totalSize = words.size();
 	for(unsigned int c = 0; c < totalSize; c++){
 		std::string& word = words[c];
-		
+
 		// First, calculate the score based on the mean letter frequency and
 		// adjust if no vowels.
 		score = 0.0;
@@ -117,27 +117,27 @@ void Wordlist::scoreWords(void){
 			score += frequencies[on];
 		}
 		score /= (double)length;
-		
+
 		// Adjust if no vowels.
 		if(!hasVowels){
 			score *= 0.75; // lower = harder
 		}
-		
+
 		// Then, account for length (lower length implies a harder word).
 		// Scaling Function: f(x) = 0.5x(x + 1)
 		score *= 0.5 * length * (length + 1);
 		score = std::max(0.0, score);
-		
+
 		// And save the score as well as displaying our progress.
 		scores[word] = score;
 		dispProgress(int(c + 1), int(totalSize), /*message=*/"Scoring words", /*style=*/"percent", /*metering=*/100);
 	}
-	
+
 	// Sort words based on their score. //
 	// Alert user to operation.
 	std::cout << "Sorting words... ";
 	std::cout.flush();
-	
+
 	// Copy over the map as pairs of values into a vector and sort that vector by value.
 	std::vector<std::pair<std::string, double> > items;
 	items.clear();
@@ -145,14 +145,14 @@ void Wordlist::scoreWords(void){
 	std::sort(items.begin(), items.end(), [](std::pair<std::string, double>& a, std::pair<std::string, double>& b){
 		return std::get<1>(a) > std::get<1>(b);
 	});
-	
+
 	// Copy back into original words vector, overwriting.
 	words.clear();
 	for(unsigned int i = 0, e = items.size(); i < e; i++){
 		std::string& word = std::get<0>(items[i]);
 		words.push_back(word);
 	}
-	
+
 	// Update user.
 	std::cout << "done." << std::endl;
 	std::cout.flush();
@@ -162,7 +162,7 @@ void Wordlist::scoreWords(void){
 	}
 	std::cout << std::endl;
 	*/
-	
+
 	// Initialize level data.
 	initLevels();
 }

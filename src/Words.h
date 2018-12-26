@@ -1,5 +1,6 @@
 #ifndef WORDS_INC
 #define WORDS_INC
+#include <iostream>
 #include <cstdio>
 #include <cmath>
 #include <string>
@@ -10,7 +11,8 @@
 #include <mutex>
 #include <atomic>
 #include <thread>
-#include "../../c++_airplay_lib/src/Actions.h"
+#include "../../libairplay/include/airplay_browser.hpp"
+#include "../../libairplay/include/airplay_device.hpp"
 
 #define NUM_LEVELS 20
 #define GUESS_LIMIT 7

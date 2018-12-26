@@ -1,6 +1,7 @@
 #ifndef GAME_INC
 #define GAME_INC
 #include "Words.h"
+#include <iostream>
 #include <iomanip>
 #include <stdexcept>
 #include <cctype>
@@ -23,7 +24,7 @@ class Game {
 	private:
 		// Private use.
 		Wordlist list; // wordlist
-		AirplayConnection& conn; // airplay connection
+		airplay_device& conn; // airplay connection
 		gdImagePtr background; // background image
 		
 		// Other threads allowed access, must be thread-safe.
@@ -49,7 +50,7 @@ class Game {
 		int computeScoreChange(bool won, unsigned int level); // compute score change
 		char nextLetterToGuess(); // figure out the next letter to guess
 	public:
-		Game(AirplayConnection& conn);
+		Game(airplay_device& conn);
 		~Game(){ }
 		
 		// Main methods. //
