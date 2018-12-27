@@ -85,7 +85,7 @@ std::string Game::getCurrentGameImage(bool result_screen){
 	int green = getColor(im, 0, 255, 0);
 	int blue = getColor(im, 0, 0, 255);
 	int blue_144_color = getColor(im, 144, 144, 144);
-	int keyboard_color = getColor(im, 175, 180, 210);
+	int keyboard_color = getColor(im, 137, 138, 99);
 	int rank_color = getColor(im, 65, 145, 75);
 	int cross_color = getColor(im, 100, 90, 80);
 
@@ -191,13 +191,18 @@ std::string Game::getCurrentGameImage(bool result_screen){
 	} else if(!result_screen && !waitingForWord){
 		// Illustrate the guessing progress with a progress bar and the image for the corresponding stage. //
 		// Write the progress bar.
-		std::string progress_text = list.dispProgress(getIncorrectGuessesNum(), GUESS_LIMIT, "Incorrect", "progress", /*metering=*/-1, /*increment=*/5, /*silent=*/true);
-		err = gdImageStringFT(im, &brect[0], getColor(im, 120, 166, 144), font_times, 40.0, 0.0, 75, 340, const_cast<char*>(progress_text.c_str()));
-		if(err){
-			std::cerr << err << std::endl;
-			return "";
+		int leftX = 298, leftY = 305;
+		const int GUESS_RECT_WIDTH = 50, GUESS_RECT_HEIGHT = 50;
+		const auto incorrect_guesses = getIncorrectGuessesNum();
+		for(unsigned int i = 0; i < GUESS_LIMIT; i++){
+			gdPointPtr pts = new gdPoint[4];
+			pts[0].x = leftX; pts[0].y = leftY;
+			pts[1].x = leftX + GUESS_RECT_WIDTH; pts[1].y = leftY;
+			pts[2].x = leftX + GUESS_RECT_WIDTH; pts[2].y = leftY + GUESS_RECT_HEIGHT;
+			pts[3].x = leftX; pts[3].y = leftY + GUESS_RECT_HEIGHT;
+			leftX += GUESS_RECT_WIDTH * 1.5;
+			gdImageFilledPolygon(im, pts, 4, (i < incorrect_guesses ? red : rank_color));
 		}
-		const int MIN_Y_REACH = brect[3] + 10;
 
 		// And write the guessing stage as an image (a.k.a. the actual hangman).
 		std::stringstream stage_file;
@@ -217,6 +222,7 @@ std::string Game::getCurrentGameImage(bool result_screen){
 		std::string blankedWord = getBlankedWord();
 
 		// Get the bounding rectangle and optimize the size and position based on that.
+		const int MIN_Y_REACH = brect[3] + 10;
 		size = 40.0;
 		const int DIFF_MAX = 20;
 		const int MAX_Y_REACH = 720;
@@ -388,7 +394,8 @@ std::string Game::chooseWord(std::string new_word){
 	level = 1e9; // signifies that level is N/A in this mode
 	if(new_word.length() < MIN_LETTERS) return "Word too short!";
 	auto& words = list.getSortedWords();
-	if(std::find(words.begin(), words.end(), new_word) == words.end()) return "Word not in dictionary!";
+	std::transform(new_word.begin(), new_word.end(), new_word.begin(), ::tolower);
+	// if(std::find(words.begin(), words.end(), new_word) == words.end()) return "Word not in dictionary!";
 	gameMutex.lock();
 	this->word = new_word;
 	this->waitingForWord = false;

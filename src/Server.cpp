@@ -52,7 +52,7 @@ void Server::handleRequest(int sock, std::string&& req){
 		// Extract requested path from GET request. //
 		std::string path = req.substr(4, req.find(" HTTP/1.1") - 4);
 		//printf("Requested path: |%s|.\n", path.c_str());
-		
+
 		// Decide what to send back based on requested path.
 		int code = 200; // return code
 		std::string ret; // return body
@@ -203,7 +203,7 @@ void Server::handleRequest(int sock, std::string&& req){
 				code = 404;
 			}
 		}
-		
+
 		// Generate response based on code.
 		std::stringstream response;
 		std::string blurb = "OK"; // e.g. 200 OK
@@ -216,7 +216,7 @@ void Server::handleRequest(int sock, std::string&& req){
 			ret = "<html><head><title>" + blurb + "</title></head><body><h1>" + blurb + "</h1></body></html>";
 		}
 		response << "HTTP/1.1 " << code << " " << blurb << "\r\nContent-Type: " << mime << "\r\nContent-Length: " << (ret.length() + 4) << "\r\nCache-Control: no-cache\r\n\r\n" << ret << "\r\n\r\n";
-		
+
 		// Send response.
 		int at = 0;
 		ret = response.str();
@@ -230,13 +230,13 @@ void Server::handleRequest(int sock, std::string&& req){
 			at += n;
 		}
 	}
-	
+
 	// Close the socket. //
 	::close(clientfd);
 }
 
 bool setTimeout(int sockfd, int timeout_secs){
-	struct timeval timeout;      
+	struct timeval timeout;
 	timeout.tv_sec = timeout_secs;
 	timeout.tv_usec = 0;
 	if (setsockopt (sockfd, SOL_SOCKET, SO_RCVTIMEO, (char *)&timeout, sizeof(timeout)) < 0)
@@ -249,21 +249,21 @@ bool setTimeout(int sockfd, int timeout_secs){
 void Server::start(void){
 	// Initialize variables.
 	struct sockaddr_in serv_addr, cli_addr;
-	
+
 	// Create the socket.
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if(sockfd < 0){
 		std::cerr << "Error creating socket." << std::endl;
 		return;
 	}
-	
+
 	// Set SO_REUSEADDR on it.
 	int flagVal = 1;
 	if(setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &flagVal, sizeof(flagVal)) < 0){
 		std::cerr << "Could not set SO_REUSEADDR on socket." << std::endl;
 		return;
 	}
-	
+
 	// Bind it to the specified host and port.
 	bzero((char*)&serv_addr, sizeof(serv_addr));
 	serv_addr.sin_family = AF_INET;
@@ -273,7 +273,7 @@ void Server::start(void){
 		std::cerr << "Error: Could not bind to port. Retrying in 5 seconds..." << std::endl;
 		sleep(5);
 	}
-	
+
 	// Start listening and loop, accepting new connections.
 	::listen(sockfd, MAX_BACKLOG);
 	std::cerr << "Listening on port " << port << "..." << std::endl;
@@ -285,22 +285,22 @@ void Server::start(void){
 			std::cerr << "Warning: Could not accept connection." << std::endl;
 			continue;
 		}
-		
+
 		// Set a timeout on the socket.
 		if(!setTimeout(clientfd, 3)){
 			std::cerr << "Warning: Could not set timeout on client socket." << std::endl;
 			continue;
 		}
-		
+
 		// Read request.
-		const int MESSAGE_SIZE = 256;
+		const int MESSAGE_SIZE = 1024;
 		char buf[MESSAGE_SIZE];
 		bzero(buf, MESSAGE_SIZE);
 		if(::read(clientfd, buf, MESSAGE_SIZE - 1) < 0){
 			std::cerr << "Warning: Could not read from client socket." << std::endl;
 			continue;
 		}
-		
+
 		// Handle request - also handles socket closing, etc.
 		handleRequest(clientfd, std::string(buf));
 	}

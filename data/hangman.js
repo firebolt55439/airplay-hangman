@@ -192,7 +192,7 @@ function reloadAlerts(){
 							}(args));
 						} else if(args[4] == "wordFill"){
 							$('#promptGeneralWordFill').show();
-							
+
 							// Fill in the word form.
 							$.ajax({
 								type: "GET",
@@ -201,7 +201,7 @@ function reloadAlerts(){
 							}).done(function(data){
 								$('#promptGeneralWordFill').html(data);
 							});
-							
+
 							// Install click handler.
 							$('#promptGenBtn').click(function() {
 								return function(args) {
@@ -279,7 +279,7 @@ function reloadLetters(){
 	while(node.firstChild){
 		node.removeChild(node.firstChild);
 	}
-	
+
 	// Initialize the letter selection with letters that have not already been guessed.
 	var success = false;
 	var letters;
@@ -298,7 +298,7 @@ function reloadLetters(){
 			$('#letter').val(letters[0]);
 		}
 	});
-	
+
 	// Handle alphabet buttons.
 	for(var i = 65; i <= 90; i++){
 		var letter = String.fromCharCode(i);
@@ -339,13 +339,13 @@ function guessLetter(letter){
 		// Reload the letters.
 		console.log(data);
 		reloadInterface();
-		
+
 		// Generate the title.
 		var title;
 		if(data["error"]) title = "Error!";
 		else if(data["success"]) title = "Correct!";
 		else title = "Incorrect!";
-		
+
 		// Generate the alert.
 		var context_class;
 		if(data["error"] || !data["success"]) context_class = 'alert-danger';
@@ -357,11 +357,11 @@ function guessLetter(letter){
 $(document).ready(function() {
 	// Set up the guessing panel output.
 	$('#guess_panel').hide();
-	
+
 	// Set up the modal.
 	$('#promptModal').modal("hide");
 	$('#promptModal').removeClass("hidden");
-	
+
 	// Set up the modal form.
 	$('#promptwordbtn').click(function() {
 		var ret = false;
@@ -390,7 +390,7 @@ $(document).ready(function() {
 		$('#promptwordbtn').blur();
 		return ret;
 	});
-	
+
 	// Set up the alphabet.
   	var alphabet = $('#alphabet');
   	var no_touch = (!("ontouchstart" in document.documentElement) ? "no-touch" : "");
@@ -410,11 +410,18 @@ $(document).ready(function() {
   			}
   		}
   	});
-  	
+  	$(document).keypress(function(e) {
+  		if($(document.body).hasClass("modal-open")){
+  			return;
+  		}
+  		var code = (e.keyCode || e.which);
+  		guessLetter(code);
+	});
+
   	// Reload the interface at regular intervals.
 	reloadInterface();
 	setInterval(reloadInterface, 3000);
-	
+
 	// Handle guesses.
 	$('#guessbtn').click(function() {
 		var letter = $('#letter option:selected').val().charCodeAt(0);
