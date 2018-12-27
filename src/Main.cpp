@@ -7,6 +7,7 @@
 
 std::string SERVER_HOST = "127.0.0.1";
 unsigned int SERVER_PORT = 8001;
+unsigned int LEVEL = 1;
 GameMode GAME_MODE = MODE_COMPUTER_PICKS_WORD;
 
 const std::map<GameMode, std::string> MODE_DESCRIPTORS = {
@@ -14,8 +15,8 @@ const std::map<GameMode, std::string> MODE_DESCRIPTORS = {
 };
 
 int help(int argc, char** argv){
-	fprintf(stderr, "%s [-h/--help] [-m/--mode (0-2)] [-p/--port (PORT)] [-h/--host (HOST)]\n", argv[0]);
-	fprintf(stderr, "Port is set to %u and host is set to %s\n", SERVER_PORT, SERVER_HOST.c_str());
+	fprintf(stderr, "%s [-h/--help] [-m/--mode (0-2)] [-p/--port (PORT)] [-h/--host (HOST)] [-l/--level (LEVEL)]\n", argv[0]);
+	fprintf(stderr, "Port is set to %u; host is set to %s; level is set to %d\n", SERVER_PORT, SERVER_HOST.c_str(), LEVEL);
 	fprintf(stderr, "Modes:\n\t0 = MODE_COMPUTER_PICKS_WORD\n\t1 = MODE_USER_PICKS_WORD\n\t2 = MODE_COMPUTER_GUESSES_WORD\n");
 	return 0;
 }
@@ -38,6 +39,9 @@ int main(int argc, char** argv){
 		} else if(on == "-h" || on == "--host"){
 			ASSERT((i + 1) < argc, "Not enough arguments to -h/--host");
 			SERVER_HOST = std::string(argv[i + 1]);
+		} else if(on == "-l" || on == "--level"){
+			ASSERT((i + 1) < argc, "Not enough arguments to -l/--level");
+			LEVEL = atoi(argv[i + 1]);
 		}
 	}
 	printf("Host: %s | Port: %u | Mode: %d\n", SERVER_HOST.c_str(), SERVER_PORT, GAME_MODE);
@@ -56,7 +60,7 @@ int main(int argc, char** argv){
 
 	// Start the game with the selected mode.
 	Game game(conn);
-	threads.push_back(std::thread(&Game::start_game, &game, /*level=*/1, /*mode=*/GAME_MODE));
+	threads.push_back(std::thread(&Game::start_game, &game, /*level=*/LEVEL, /*mode=*/GAME_MODE));
 
 	// Start the web server.
 	Server server(SERVER_HOST, SERVER_PORT, game);

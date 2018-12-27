@@ -57,7 +57,7 @@ function reloadTable(){
 				}
 				if(data["result"] != -1 && data["index"] == lastTableInd){
 					if(data["level"] != 1e9){
-						data["level"] = lastChild.children().eq(0); // since the new level will be broadcasted, not the old one
+						data["level"] = parseInt(lastChild.children().eq(0).text(), 10); // since the new level will be broadcasted, not the old one
 					}
 					lastChild.remove();
 				}

@@ -151,20 +151,25 @@ std::string Game::getCurrentGameImage(bool result_screen){
 		gdImageStringFT(im, &brect[0], blue_144_color, font_times, size, 0.0, brect[2], yPos, const_cast<char*>(word_text.substr(14).c_str()));
 
 		// Show if the user levelled up or down, if applicable. //
-		if(levelDiff != 0){
+		if(levelDiff != 0 || (lastGameResult == 1 && level == NUM_LEVELS)){
 			// Generate the level up/down text.
 			std::string level_text = (abs(levelDiff) == 1 ? "level" : "levels");
 			int color = (lastGameResult == 1 ? green : red);
 			std::stringstream text;
-			if(lastGameResult == 1){
-				text << "You win! ";
+			if(levelDiff){
+				if(lastGameResult == 1){
+					text << "You win! ";
+				} else {
+					text << "You lose! ";
+				}
+				if(levelDiff > 0){
+					text << "Congratulations! You moved up " << levelDiff << " " << level_text << "!";
+				} else {
+					text << "You moved down " << abs(levelDiff) << " " << level_text << ".";
+				}
 			} else {
-				text << "You lose! ";
-			}
-			if(levelDiff > 0){
-				text << "Congratulations! You moved up " << levelDiff << " " << level_text << "!";
-			} else {
-				text << "You moved down " << abs(levelDiff) << " " << level_text << ".";
+				// Victory message
+				text << "You beat the gauntlet! You can now play for fun.";
 			}
 			level_text = text.str();
 
@@ -375,7 +380,7 @@ int Game::computeScoreChange(bool won, unsigned int level){
 	// or: score(level) = -NUM_LEVELS*(1/level)^(3/2)
 	double lvl = (double)level;
 	if(won) return (int)std::sqrt(lvl * lvl * lvl);
-	else return (int)((-2)*NUM_LEVELS*std::sqrt(1.0/(lvl*lvl)));
+	else return (int)((-2)*NUM_LEVELS*std::sqrt(1.0/lvl));
 }
 
 int Game::guessLetter(char letter){
@@ -686,7 +691,8 @@ void Game::start_game(unsigned int theLevel, GameMode theMode){
 				alert = "You lost! ";
 				if(levelDiff < 0) alert += "Level down! ";
 			} else {
-				alert = "You win! ";
+				if(level == NUM_LEVELS) alert = "You beat the gauntlet! ";
+				else alert = "You win! ";
 				if(levelDiff > 0) alert += "Level up! ";
 			}
 			alert += "The word was '" + word + "'.";
